@@ -1,3 +1,9 @@
-__pycache__
-*.swp
+*.csv
 .idea
+__pycache__
+*.yaml
+*.log
+*.csv
+*~
+*.swp
+*~lock*
