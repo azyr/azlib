@@ -54,6 +54,23 @@ def sharpe_ratio(changes, rfrate_yearly, period=252):
     return annualized
 
 
+def sharpe_ratio_gacr(changes, rfrate_yearly, period=252):
+    """
+    Calculates Sharpe ratio.
+    Periods:
+        252 = daily
+        12 = monthly
+    """
+    endprice = np.cumprod(changes + 1)[-1]
+    g = gacr(1, endprice, len(changes)) - 1
+    rfrate_per_day = rfrate_yearly ** (1/period) - 1
+    excess_returns = changes - rfrate_per_day
+    std_excess_return = np.std(excess_returns)
+    dailysharpe = (g - rfrate_per_day) / std_excess_return
+    annualized = dailysharpe * np.sqrt(period)
+    return annualized
+
+
 def sortino_ratio(changes, trate_yearly, period=252):
     """
     Calculates Sortino ratio.
@@ -69,3 +86,25 @@ def sortino_ratio(changes, trate_yearly, period=252):
     dailysortino = avg_excess_return / downside_risk
     annualized = dailysortino * np.sqrt(period)
     return annualized
+
+
+def sortino_ratio_gacr(changes, trate_yearly, period=252):
+    """
+    Calculates Sortino ratio.
+    Periods:
+        252 = daily
+        12 = monthly
+    """
+    endprice = np.cumprod(changes + 1)[-1]
+    g = gacr(1, endprice, len(changes)) - 1
+    trate_per_day = trate_yearly ** (1/period) - 1
+    excess_returns = changes - trate_per_day
+    minus_exc_returns_squared = excess_returns[excess_returns < 0] ** 2
+    downside_risk = np.sqrt(np.sum(minus_exc_returns_squared) / len(excess_returns))
+    dailysortino = (g - trate_per_day) / downside_risk
+    annualized = dailysortino * np.sqrt(period)
+    return annualized
+
+
+def gacr(start, end, periods):
+    return np.e**(np.log(end/start)/periods)
