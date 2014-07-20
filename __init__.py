@@ -1,5 +1,32 @@
 import re
 import numpy as np
+import pytz
+import pandas as pd
+import tzlocal
+from datetime import datetime
+
+
+def get_localtz():
+    return pytz.timezone(tzlocal.get_localzone().zone)
+
+
+def local_to_utc(dt, is_dst=False):
+    l_tz = get_localtz()
+    dt = l_tz.normalize(l_tz.localize(dt, is_dst))
+    return dt.astimezone(pytz.utc)
+
+
+def utc_to_local(dt):
+    dt = pytz.utc.normalize(pytz.utc.localize(dt))
+    return dt.astimezone(get_localtz())
+
+
+def utcnow():
+    return pd.Timestamp(datetime.utcnow(), tz='UTC')
+
+
+def estnow():
+    return pd.Timestamp(datetime.utcnow(), tz='UTC').tz_convert("US/Eastern")
 
 
 def sma(x, period):
@@ -26,6 +53,13 @@ def dump(obj):
     for attr in dir(obj):
         if not (len(attr) > 4 and attr[0:2] == '__' and attr[-2:] == '__') and hasattr( obj, attr ):
             print("{}: {}".format(attr, getattr(obj, attr)))
+
+
+def chunks(l, n):
+    """ Yield successive n-sized chunks from l.
+    """
+    for i in range(0, len(l), n):
+        yield l[i:i+n]
 
 
 def globber(s, choices):
@@ -108,3 +142,5 @@ def sortino_ratio_gacr(changes, trate_yearly, period=252):
 
 def gacr(start, end, periods):
     return np.e**(np.log(end/start)/periods)
+
+

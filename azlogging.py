@@ -45,3 +45,15 @@ def basic_config(**kwargs):
 
     r.addHandler(stdout)
     r.addHandler(stderr)
+
+
+def quick_config(verbosity, quiet, fmt='%(asctime)s [%(levelname)s] %(message)s', dtfmt='%j-%H:%M:%S'):
+    if quiet:
+        basic_config(level=logging.WARNING, format=fmt, datefmt=dtfmt)
+    else:
+        if verbosity == 0:
+            basic_config(level=logging.INFO, format=fmt, datefmt=dtfmt)
+        elif verbosity == 1:
+            basic_config(level=logging.DEBUG, format=fmt, datefmt=dtfmt)
+        elif verbosity >= 2:
+            basic_config(level=logging.NOTSET, format=fmt, datefmt=dtfmt)
