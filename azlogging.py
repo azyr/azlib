@@ -2,6 +2,7 @@ import logging
 import sys
 
 class NoDiagnosticsFilter(logging.Filter):
+    """Filter used to pick only records that have levelno below cutofflevel."""
 
     def __init__(self, cutofflevel):
         self.cutofflevel = cutofflevel
@@ -9,9 +10,23 @@ class NoDiagnosticsFilter(logging.Filter):
     def filter(self, record):
         return record.levelno < self.cutofflevel
 
-
-# this is NOT thread safe! use only at the initialization phase of the program...
 def basic_config(**kwargs):
+
+    """Remove all existing logging handlers/filters and setup new ones.
+
+    Running this will make ipython work properly with scripts/modules that use
+    logging. This is also a quick way to have a basic logging configuration that
+    splits warnings and move severe messages to stderr, others to stdout.
+
+    Warning: This is not thread safe, use only at the initialization phase of
+             of the program!
+
+    Keyword arguments:
+    level     -- minimum logging level to show
+    fmt       -- format for records
+    datefmt   -- format for the date in records
+    """
+
     r = logging.root
 
     # remove existing handlers and filters
@@ -48,6 +63,14 @@ def basic_config(**kwargs):
 
 
 def quick_config(verbosity, quiet, fmt='%(asctime)s [%(levelname)s] %(message)s', dtfmt='%j-%H:%M:%S'):
+    """Wrapper for basic_config for quick configuration.
+
+    Arguments:
+    verbosity -- verbosity level: 0 = INFO, 1 = DEBUG, 2 = NOTSET
+    quiet     -- if true only level >= WARNING will be shown
+    fmt       -- format for records
+    dtfmt     -- format for dates in records
+    """
     if quiet:
         basic_config(level=logging.WARNING, format=fmt, datefmt=dtfmt)
     else:
