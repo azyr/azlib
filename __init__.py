@@ -93,6 +93,7 @@ def globber(s, choices):
     # escape some characters to get the correct behaviour
     s_re = s_re.replace('[', '\\[').replace(']', '\\]').replace('(', '\\(').replace(')', '\\)')
     s_re = s_re.replace('^', '\\^').replace('$', '\\$').replace('|', '\\|').replace('\\', '\\\\')
+    s_re = s_re.replace('.', '\\.')
     s_re = s_re.replace("*", ".*").replace("?", ".")
     # word boundaries
     s_re = "^" + s_re + "$"
@@ -133,6 +134,20 @@ def get_periodicity(series, p):
     days_per_year = 365.25
     nyears = period = (series.index[-1] - series.index[0]).days / days_per_year
     return nyears * periods_per_year(p)
+
+def annual_volatility(changes, period=-1):
+    """Calculate annualized volatility (standard deviation)
+
+    Arguments:
+    changes -- asset returns
+    period          -- periodicity of the asset returns (optional, not neccessary
+                       nor recommended when changes is pd.Series)
+    """
+    if type(changes) == pd.Series and period == -1: 
+        period = periods_per_year(changes)
+    if period == -1:
+        raise Exception("Period parameter required when changes is not pd.Series")
+    return np.std(changes) * np.sqrt(period)
 
 def sharpe_ratio(changes, rfrate_yearly, period=-1):
     """Calculate Sharpe ratio.
@@ -259,5 +274,40 @@ def gacr(*args):
         return np.e**(np.log(end/start)/period)
     else:
         raise Exception("Invalid number of arguments: {}".format(len(args)))
+
+
+def decorate_str(input_s, method='underline', char='=', newln=True):
+    """Decorate input_s str.
+
+    Arguments:
+    input_s   -- str to decorate
+    method    -- decoration method, options: 'underline', 'over_under', 'surround'
+    char      -- char to use for decoration
+    newln     -- put newline to the end of the output
+    """
+    s = ""
+    if method == "underline":
+        s += input_s + '\n'
+        s += len(input_s) * char
+        if newln:
+            s += '\n'
+        return s
+    if method == "over_under":
+        s += len(input_s) * char + '\n'
+        s += input_s + '\n'
+        s += len(input_s) * char
+        if newln:
+            s += '\n'
+        return s
+    if method == "surround":
+        s += (len(input_s) + 6) * char + '\n'
+        s += char * 2 + ' ' + input_s + ' ' + char * 2 + '\n'
+        s += (len(input_s) + 6) * char
+        if newln:
+            s += '\n'
+        return s
+    raise Exception("Unknown method: {}".format(method))
+
+
 
 
