@@ -27,6 +27,7 @@ def utcnow():
     """Return UTC time now as pd.Timestamp."""
     return pd.Timestamp(datetime.utcnow(), tz='UTC')
 
+
 def estnow():
     """Return US/Eastern time now as pd.Timestamp."""
     return pd.Timestamp(datetime.utcnow(), tz='UTC').tz_convert("US/Eastern")
@@ -59,6 +60,7 @@ def feq(a, b, e=1e-8):
     else:
         return False
 
+
 def feqd(a, b, e=1e-14):
     """Test floats for equality.
 
@@ -70,7 +72,8 @@ def feqd(a, b, e=1e-14):
     e -- maximum allowed 'error'
     """
     return abs(1 - a / b) < e
-    
+
+
 def chunks(l, n):
     """Iterator to return n-sized chunks from l.
 
@@ -80,6 +83,7 @@ def chunks(l, n):
     """
     for i in range(0, len(l), n):
         yield l[i:i+n]
+
 
 def globber(s, choices):
     """Imitate the globber behaviour of bash. Return list of matching choices.
@@ -102,6 +106,7 @@ def globber(s, choices):
             candidates.append(x)
     return candidates
 
+
 def periods_per_year(p):
     """Return average number periods per year.
 
@@ -123,6 +128,7 @@ def periods_per_year(p):
     else:
         raise Exception("p has to be either str or pd.Series")
 
+
 def get_periodicity(series, p):
     """Return number of periods on average in a series of a given length p.
 
@@ -130,10 +136,10 @@ def get_periodicity(series, p):
     series -- pd.Series to analyze
     p      -- str representing the period length, use pandas notation
     """
-
     days_per_year = 365.25
     nyears = period = (series.index[-1] - series.index[0]).days / days_per_year
     return nyears * periods_per_year(p)
+
 
 def annual_volatility(changes, period=-1):
     """Calculate annualized volatility (standard deviation)
@@ -143,7 +149,7 @@ def annual_volatility(changes, period=-1):
     period          -- periodicity of the asset returns (optional, not neccessary
                        nor recommended when changes is pd.Series)
     """
-    if type(changes) == pd.Series and period == -1: 
+    if type(changes) == pd.Series and period == -1:
         period = periods_per_year(changes)
     if period == -1:
         raise Exception("Period parameter required when changes is not pd.Series")
@@ -158,7 +164,7 @@ def sharpe_ratio(changes, rfrate_yearly, period=-1):
     period          -- periodicity of the asset returns (optional, not neccessary
                        nor recommended when changes is pd.Series)
     """
-    if type(changes) == pd.Series and period == -1: 
+    if type(changes) == pd.Series and period == -1:
         period = periods_per_year(changes)
     if period == -1:
         raise Exception("Period parameter required when changes is not pd.Series")
@@ -169,6 +175,7 @@ def sharpe_ratio(changes, rfrate_yearly, period=-1):
     dailysharpe = avg_excess_return / std_excess_return
     annualized = dailysharpe * np.sqrt(period)
     return annualized
+
 
 def sharpe_ratio_gacr(changes, rfrate_yearly, period=-1):
     """Calculate Sharpe ratio (GACR method)
@@ -183,7 +190,7 @@ def sharpe_ratio_gacr(changes, rfrate_yearly, period=-1):
     period          -- periodicity of the asset returns (optional, not neccessary
                        nor recommended when changes is pd.Series)
     """
-    if type(changes) == pd.Series and period == -1: 
+    if type(changes) == pd.Series and period == -1:
         period = periods_per_year(changes)
     if period == -1:
         raise Exception("Period parameter required when changes is not pd.Series")
@@ -206,7 +213,7 @@ def sortino_ratio(changes, trate_yearly, period=-1):
     period          -- periodicity of the asset returns (optional, not neccessary
                        nor recommended when changes is pd.Series)
     """
-    if type(changes) == pd.Series and period == -1: 
+    if type(changes) == pd.Series and period == -1:
         period = periods_per_year(changes)
     if period == -1:
         raise Exception("Period parameter required when changes is not pd.Series")
@@ -233,7 +240,7 @@ def sortino_ratio_gacr(changes, trate_yearly, period=-1):
     period          -- periodicity of the asset returns (optional, not neccessary
                        nor recommended when changes is pd.Series)
     """
-    if type(changes) == pd.Series and period == -1: 
+    if type(changes) == pd.Series and period == -1:
         period = periods_per_year(changes)
     if period == -1:
         raise Exception("Period parameter required when changes is not pd.Series")
@@ -246,6 +253,7 @@ def sortino_ratio_gacr(changes, trate_yearly, period=-1):
     dailysortino = (g - trate_per_period) / downside_risk
     annualized = dailysortino * np.sqrt(period)
     return annualized
+
 
 def gacr(*args):
     """Return GACR.
@@ -270,7 +278,9 @@ def gacr(*args):
             period = get_periodicity(series, p)
         return np.e**(np.log(series[-1]/series[0])/period)
     if len(args) == 3:
-        start = args[0]; end = args[1]; period = args[2]
+        start = args[0]
+        end = args[1]
+        period = args[2]
         return np.e**(np.log(end/start)/period)
     else:
         raise Exception("Invalid number of arguments: {}".format(len(args)))
@@ -309,5 +319,15 @@ def decorate_str(input_s, method='underline', char='=', newln=True):
     raise Exception("Unknown method: {}".format(method))
 
 
+def max_drawdown(x):
+    """Get max drawdown for prices x.
 
+    Returns (start, end, pct_drawdown).
 
+    Arguments:
+    x   -- prices
+    """
+    end = np.argmax(np.maximum.accumulate(x) - x)
+    start = np.argmax(x[:end])
+    pct = 1 - x[end] / x[start]
+    return start, end, pct
