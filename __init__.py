@@ -74,6 +74,16 @@ def feqd(a, b, e=1e-14):
     return abs(1 - a / b) < e
 
 
+def bround(x, base):
+    """Round x to nearest base.
+
+    Arguments:
+    x     -- number to round
+    base  -- base to use for rounding
+    """
+    return base * round(x / base)
+
+
 def chunks(l, n):
     """Iterator to return n-sized chunks from l.
 
@@ -331,3 +341,46 @@ def max_drawdown(x):
     start = np.argmax(x[:end])
     pct = 1 - x[end] / x[start]
     return start, end, pct
+
+
+class Bunch(object):
+    """Create C-like structs (basically wrap a dictionary)."""
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+
+    def __repr__(self):
+        return self.__dict__.__repr__()
+
+
+# these are not really neccessary, can use DataFrame.to_string() method instead
+# def pd_print_full(x):
+#     """Print full pandas structures."""
+#     old_val = pd.options.display.max_rows
+#     pd.set_option('display.max_rows', len(x))
+#     print(x)
+#     pd.set_option('display.max_rows', old_val)
+# 
+# 
+# def pd_print_truncated(x):
+#     """Print pandas structures truncated."""
+#     old_val = pd.options.display.large_repr
+#     pd.set_option('display.large_repr', 'truncate')
+#     print(x)
+#     pd.set_option('display.large_repr', old_val)
+
+
+def bytes_to_str(b):
+    """Convert bytes to string."""
+    if b <= 1024:
+        return "{} B".format(b)
+    elif b <= 1024 ** 2:
+        return "{} KB".format(round(b/1024, 2))
+    elif b <= 1024 ** 3:
+        return "{} MB".format(round(b/1024**2, 2))
+    elif b <= 1024 ** 4:
+        return "{} GB".format(round(b/1024**3, 2))
+    elif b <= 1024 ** 5:
+        return "{} TB".format(round(b/1024**4, 2))
+    else:
+        return "{} PB".format(round(b/1024**5, 2))
