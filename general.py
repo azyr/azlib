@@ -412,3 +412,10 @@ def generate_distinct_colors(num_colors, to_rgb=True, hue_cycle=10, hue_minor_cy
             color = colorsys.hls_to_rgb(*color)
         colors.append(color)
     return colors
+
+
+def idx(barray):
+    """Convert boolean array into index array."""
+    if type(barray) is not np.ndarray:
+        barray = np.array(barray)
+    return np.arange(len(barray))[barray]
