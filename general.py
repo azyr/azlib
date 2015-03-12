@@ -1,4 +1,5 @@
 import re
+import math
 import colorsys
 import numpy as np
 import pytz
@@ -344,7 +345,8 @@ def max_drawdown(x):
     end = np.argmax(np.maximum.accumulate(x) - x)
     start = np.argmax(x[:end])
     pct = 1 - x[end] / x[start]
-    return start, end, pct
+    absval = x[end] - x[start]
+    return start, end, pct, absval
 
 
 class Bunch(object):
@@ -419,3 +421,5 @@ def idx(barray):
     if type(barray) is not np.ndarray:
         barray = np.array(barray)
     return np.arange(len(barray))[barray]
+
+sign = lambda x: math.copysign(1, x)
