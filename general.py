@@ -4,6 +4,7 @@ import colorsys
 import numpy as np
 import pytz
 import pandas as pd
+import bottleneck as bn
 try:
     import tzlocal
 except ImportError:
@@ -268,6 +269,29 @@ def sortino_ratio_gacr(changes, trate_yearly=1.04, period=-1):
     dailysortino = (g - trate_per_period) / downside_risk
     annualized = dailysortino * np.sqrt(period)
     return annualized
+
+
+def stability_ratio(changes):
+    meanchange = np.mean(changes)
+    # in this exceptional case we just define this function to return 0
+    if meanchange == 0:
+        return 0
+    # Standard deviation seems to be better here than plain differences to mean.
+    # They produce more sensible transition from good to bad results.
+    if meanchange >= 0:
+        bmask = changes < 0
+        selchanges = changes[bmask]
+    else:
+        bmask = changes > 0
+        selchanges = changes[bmask]
+    if len(selchanges) == 0:
+        penalty = 0
+    else:
+        penalty = np.std(selchanges) / abs(meanchange)
+    # shoudlnt happen ... keep it here just to make sure for now
+    if np.isnan(penalty):
+        import ipdb; ipdb.set_trace()
+    return 1 / (1 + penalty)
 
 
 def gacr(*args):
