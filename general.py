@@ -315,12 +315,12 @@ def gacr(*args):
             period = p
         else:
             period = get_periodicity(series, p)
-        return np.e**(np.log(series[-1]/series[0])/period)
+        return np.e**(np.log(series[-1]/series[0])/period) - 1
     if len(args) == 3:
         start = args[0]
         end = args[1]
         period = args[2]
-        return np.e**(np.log(end/start)/period)
+        return np.e**(np.log(end/start)/period) - 1
     else:
         raise Exception("Invalid number of arguments: {}".format(len(args)))
 
