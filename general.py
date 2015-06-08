@@ -366,9 +366,21 @@ def max_drawdown(x):
     Arguments:
     x   -- prices
     """
-    end = np.argmax(np.maximum.accumulate(x) - x)
-    start = np.argmax(x[:end])
-    pct = 1 - x[end] / x[start]
+    end = np.argmin(x / np.maximum.accumulate(x))
+    if type(x) is not pd.Timestamp:  # no positive prices
+        if x is pd.Series:
+            end = x.index[-1]
+            start = x.index[0]
+        else:
+            end = len(x) - 1
+            start = 0
+        pct = 1
+    else:
+        start = np.argmax(x[:end])
+        if x[end] <= 0:
+            pct = 1
+        else:
+            pct = 1 - x[end] / x[start]
     absval = x[end] - x[start]
     return start, end, pct, absval
 
