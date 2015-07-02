@@ -315,12 +315,12 @@ def gacr(*args):
             period = p
         else:
             period = get_periodicity(series, p)
-        return np.e**(np.log(series[-1]/series[0])/period)
+        return np.e**(np.log(series[-1]/series[0])/period) - 1
     if len(args) == 3:
         start = args[0]
         end = args[1]
         period = args[2]
-        return np.e**(np.log(end/start)/period)
+        return np.e**(np.log(end/start)/period) - 1
     else:
         raise Exception("Invalid number of arguments: {}".format(len(args)))
 
@@ -366,9 +366,21 @@ def max_drawdown(x):
     Arguments:
     x   -- prices
     """
-    end = np.argmax(np.maximum.accumulate(x) - x)
-    start = np.argmax(x[:end])
-    pct = 1 - x[end] / x[start]
+    end = np.argmin(x / np.maximum.accumulate(x))
+    if type(end) is not pd.Timestamp:  # no positive prices
+        if x is pd.Series:
+            end = x.index[-1]
+            start = x.index[0]
+        else:
+            end = len(x) - 1
+            start = 0
+        pct = 1
+    else:
+        start = np.argmax(x[:end])
+        if x[end] <= 0:
+            pct = 1
+        else:
+            pct = 1 - x[end] / x[start]
     absval = x[end] - x[start]
     return start, end, pct, absval
 
@@ -447,3 +459,23 @@ def idx(barray):
     return np.arange(len(barray))[barray]
 
 sign = lambda x: math.copysign(1, x)
+
+
+def changescore(x):
+    if x >= 1:
+        return x - 1
+    return (-1 / x) + 1
+
+changescore = np.vectorize(changescore)
+
+def changescore_to_ret(x):
+    if x >= 0:
+        return x + 1
+    res = x - 1
+    return -1 / res
+
+changescore_to_ret = np.vectorize(changescore_to_ret)
+
+def update_progress(progress, barwidth=20, suffix=""):
+    s = '\r[{:<' + str(barwidth) + '}] {:<7.2%} {}'
+    print(s.format('#' * int(round(progress * barwidth)), progress, suffix), end='')
