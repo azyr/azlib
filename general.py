@@ -357,32 +357,56 @@ def decorate_str(input_s, method='underline', char='=', newln=True):
         return s
     raise Exception("Unknown method: {}".format(method))
 
+def max_drawdown_abs(x):
+    diffs = x - np.maximum.accumulate(x)
+    if np.all(diffs == 0):
+        return -1, -1, 0
+    end = np.argmin(diffs)
+    endval = x[end]
+    start = np.argmax(x[:end])
+    startval = x[start]
+    assert endval < startval
+    dd = abs(endval - startval)
+    return start, end, dd
 
-def max_drawdown(x):
-    """Get max drawdown for prices x.
+def max_drawdown_rel(x):
+    assert not np.any(x < 0)
+    diffs = x / np.maximum.accumulate(x)
+    if np.all(diffs == 1):
+        return -1, -1, 1
+    end = np.argmin(diffs)
+    endval = x[end]
+    start = np.argmax(x[:end])
+    startval = x[start]
+    assert endval < startval
+    dd = endval / startval
+    return start, end, dd
 
-    Returns (start, end, pct_drawdown).
-
-    Arguments:
-    x   -- prices
-    """
-    end = np.argmin(x / np.maximum.accumulate(x))
-    if type(end) is not pd.Timestamp:  # no positive prices
-        if x is pd.Series:
-            end = x.index[-1]
-            start = x.index[0]
-        else:
-            end = len(x) - 1
-            start = 0
-        pct = 1
-    else:
-        start = np.argmax(x[:end])
-        if x[end] <= 0:
-            pct = 1
-        else:
-            pct = 1 - x[end] / x[start]
-    absval = x[end] - x[start]
-    return start, end, pct, absval
+# def max_drawdown(x):
+#     """Get max drawdown for prices x.
+# 
+#     Returns (start, end, pct_drawdown).
+# 
+#     Arguments:
+#     x   -- prices
+#     """
+#     end = np.argmin(x / np.maximum.accumulate(x))
+#     if type(end) is not pd.Timestamp:  # no positive prices
+#         if x is pd.Series:
+#             end = x.index[-1]
+#             start = x.index[0]
+#         else:
+#             end = len(x) - 1
+#             start = 0
+#         pct = 1
+#     else:
+#         start = np.argmax(x[:end])
+#         if x[end] <= 0:
+#             pct = 1
+#         else:
+#             pct = 1 - x[end] / x[start]
+#     absval = x[end] - x[start]
+#     return start, end, pct, absval
 
 
 class Bunch(object):
