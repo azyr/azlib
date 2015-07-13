@@ -193,31 +193,31 @@ def sharpe_ratio(changes, rfrate_yearly, period=-1):
     return annualized
 
 
-def sharpe_ratio_gacr(changes, rfrate_yearly, period=-1):
-    """Calculate Sharpe ratio (GACR method)
-
-    Calculate Sharpe-ratio using daily GACR minus daily risk-free rate as a nominator
-    instead of average daily excess return. Normally gives more sensible results than
-    the standard method (especially on daily returns).
-
-    Arguments:
-    changes         -- asset returns
-    rfrate_yearly   -- risk-free rate (yearly), for example 1.04
-    period          -- periodicity of the asset returns (optional, not neccessary
-                       nor recommended when changes is pd.Series)
-    """
-    if type(changes) == pd.Series and period == -1:
-        period = periods_per_year(changes)
-    if period == -1:
-        raise Exception("Period parameter required when changes is not pd.Series")
-    endprice = np.cumprod(changes + 1)[-1]
-    g = gacr(1, endprice, len(changes)) - 1
-    rfrate_per_period = rfrate_yearly ** (1/period) - 1
-    excess_returns = changes - rfrate_per_period
-    std_excess_return = np.std(excess_returns)
-    dailysharpe = (g - rfrate_per_period) / std_excess_return
-    annualized = dailysharpe * np.sqrt(period)
-    return annualized
+# def sharpe_ratio_cagr(changes, rfrate_yearly, period=-1):
+#     """Calculate Sharpe ratio (CAGR method)
+# 
+#     Calculate Sharpe-ratio using daily GACR minus daily risk-free rate as a nominator
+#     instead of average daily excess return. Normally gives more sensible results than
+#     the standard method (especially on daily returns).
+# 
+#     Arguments:
+#     changes         -- asset returns
+#     rfrate_yearly   -- risk-free rate (yearly), for example 1.04
+#     period          -- periodicity of the asset returns (optional, not neccessary
+#                        nor recommended when changes is pd.Series)
+#     """
+#     if type(changes) == pd.Series and period == -1:
+#         period = periods_per_year(changes)
+#     if period == -1:
+#         raise Exception("Period parameter required when changes is not pd.Series")
+#     endprice = np.cumprod(changes + 1)[-1]
+#     g = cagr(1, endprice, len(changes)) - 1
+#     rfrate_per_period = rfrate_yearly ** (1/period) - 1
+#     excess_returns = changes - rfrate_per_period
+#     std_excess_return = np.std(excess_returns)
+#     dailysharpe = (g - rfrate_per_period) / std_excess_return
+#     annualized = dailysharpe * np.sqrt(period)
+#     return annualized
 
 
 def sortino_ratio(changes, trate_yearly, period=-1):
@@ -243,32 +243,32 @@ def sortino_ratio(changes, trate_yearly, period=-1):
     return annualized
 
 
-def sortino_ratio_gacr(changes, trate_yearly=1.04, period=-1):
-    """Calculate Sortino ratio (GACR method)
-
-    Calculate Sortino-ratio using daily GACR minus daily risk-free rate as a nominator
-    instead of average daily excess return. Normally gives more sensible results than
-    the standard method (especially on daily returns).
-
-    Arguments:
-    changes         -- asset returns
-    rfrate_yearly   -- risk-free rate (yearly), for example 1.04
-    period          -- periodicity of the asset returns (optional, not neccessary
-                       nor recommended when changes is pd.Series)
-    """
-    if type(changes) == pd.Series and period == -1:
-        period = periods_per_year(changes)
-    if period == -1:
-        raise Exception("Period parameter required when changes is not pd.Series")
-    endprice = np.cumprod(changes + 1)[-1]
-    g = gacr(1, endprice, len(changes)) - 1
-    trate_per_period = trate_yearly ** (1/period) - 1
-    excess_returns = changes - trate_per_period
-    minus_exc_returns_squared = excess_returns[excess_returns < 0] ** 2
-    downside_risk = np.sqrt(np.sum(minus_exc_returns_squared) / len(excess_returns))
-    dailysortino = (g - trate_per_period) / downside_risk
-    annualized = dailysortino * np.sqrt(period)
-    return annualized
+# def sortino_ratio_gacr(changes, trate_yearly=1.04, period=-1):
+#     """Calculate Sortino ratio (GACR method)
+# 
+#     Calculate Sortino-ratio using daily GACR minus daily risk-free rate as a nominator
+#     instead of average daily excess return. Normally gives more sensible results than
+#     the standard method (especially on daily returns).
+# 
+#     Arguments:
+#     changes         -- asset returns
+#     rfrate_yearly   -- risk-free rate (yearly), for example 1.04
+#     period          -- periodicity of the asset returns (optional, not neccessary
+#                        nor recommended when changes is pd.Series)
+#     """
+#     if type(changes) == pd.Series and period == -1:
+#         period = periods_per_year(changes)
+#     if period == -1:
+#         raise Exception("Period parameter required when changes is not pd.Series")
+#     endprice = np.cumprod(changes + 1)[-1]
+#     g = gacr(1, endprice, len(changes)) - 1
+#     trate_per_period = trate_yearly ** (1/period) - 1
+#     excess_returns = changes - trate_per_period
+#     minus_exc_returns_squared = excess_returns[excess_returns < 0] ** 2
+#     downside_risk = np.sqrt(np.sum(minus_exc_returns_squared) / len(excess_returns))
+#     dailysortino = (g - trate_per_period) / downside_risk
+#     annualized = dailysortino * np.sqrt(period)
+#     return annualized
 
 
 def stability_ratio(changes):
@@ -294,16 +294,16 @@ def stability_ratio(changes):
     return 1 / (1 + penalty)
 
 
-def gacr(*args):
-    """Return GACR.
+def CAGR(*args):
+    """Return CAGR.
 
     Two overloads:
 
-    gacr(series, p):
+    cagr(series, p):
     series -- pd.Series for input (containing asset price or cumulative returns)
     p      -- periodicity to use for calculation (pandas notation)
 
-    gacr(start, end, period):
+    cagr(start, end, period):
     start  -- starting balance/price
     end    -- ending balance/price
     period -- how many periods to use for calculation
