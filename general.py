@@ -294,7 +294,7 @@ def stability_ratio(changes):
     return 1 / (1 + penalty)
 
 
-def CAGR(*args):
+def cagr(*args):
     """Return CAGR.
 
     Two overloads:
