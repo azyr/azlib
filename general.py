@@ -1,4 +1,5 @@
 import re
+import sys
 import math
 import colorsys
 import numpy as np
@@ -503,3 +504,6 @@ changescore_to_ret = np.vectorize(changescore_to_ret)
 def update_progress(progress, barwidth=20, suffix=""):
     s = '\r[{:<' + str(barwidth) + '}] {:<7.2%} {}'
     print(s.format('#' * int(round(progress * barwidth)), progress, suffix), end='')
+
+def printf(*args, sep=' ', end='\n', file=sys.stdout):
+        print(*args, sep=sep, end=end, file=file, flush=True)
